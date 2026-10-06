@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=340">
+  <title>Meet Auto-Leave</title>
+  <style>
+    /* ═══════════ DESIGN TOKENS ═══════════ */
+    :root {
+      --bg-primary:    #1a1a2e;
+      --bg-secondary:  #16213e;
+      --bg-card:       #1e2a47;
+      --bg-input:      #0f1729;
+      --text-primary:  #e0e0e0;
+      --text-secondary:#8892a4;
+      --accent:        #00897b;
+      --accent-light:  #26a69a;
+      --accent-glow:   rgba(0,137,123,.25);
+      --danger:        #ef5350;
+      --danger-glow:   rgba(239,83,80,.25);
+      --border:        rgba(255,255,255,.06);
+      --radius:        12px;
+      --radius-sm:     8px;
+      --transition:    .25s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* ═══════════ GLOBAL ═══════════ */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      width: 340px;
+      min-height: 100px;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    /* ═══════════ HEADER ═══════════ */
+    .header {
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+      padding: 16px 20px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .header-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 2px 10px var(--accent-glow);
+    }
+    .header-icon svg { width: 18px; height: 18px; fill: #fff; }
+    .header-text h1 {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: .3px;
+    }
+    .header-text p {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 1px;
+    }
+
+    /* ═══════════ MAIN ═══════════ */
+    .main { padding: 16px 20px 20px; display: flex; flex-direction: column; gap: 14px; }
+
+    /* ─── Toggle row ─── */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      transition: border-color var(--transition);
+    }
+    .toggle-row:hover { border-color: rgba(255,255,255,.12); }
+    .toggle-label { font-size: 13px; font-weight: 500; }
+
+    /* iOS-style toggle */
+    .toggle {
+      position: relative;
+      width: 44px; height: 24px;
+      cursor: pointer;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle .slider {
+      position: absolute; inset: 0;
+      background: #3a3f55;
+      border-radius: 999px;
+      transition: var(--transition);
+    }
+    .toggle .slider::before {
+      content: '';
+      position: absolute;
+      width: 18px; height: 18px;
+      left: 3px; bottom: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: var(--transition);
+      box-shadow: 0 1px 4px rgba(0,0,0,.3);
+    }
+    .toggle input:checked + .slider { background: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
+    .toggle input:checked + .slider::before { transform: translateX(20px); }
+
+    /* ─── Cards ─── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      transition: border-color var(--transition);
+    }
+    .card:hover { border-color: rgba(255,255,255,.12); }
+    .card-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    /* ─── Threshold row ─── */
+    .threshold-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .threshold-row label {
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .threshold-input {
+      width: 72px;
+      padding: 7px 10px;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 600;
+      text-align: center;
+      outline: none;
+      transition: var(--transition);
+    }
+    .threshold-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    .unit { font-size: 12px; color: var(--text-secondary); }
+
+    /* ─── Checkbox ─── */
+    .check-row {
+      display: flex; align-items: flex-start; gap: 10px; margin-top: 10px;
+    }
+    .check-row input[type="checkbox"] {
+      appearance: none; -webkit-appearance: none;
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,.2);
+      border-radius: 4px;
+      background: var(--bg-input);
+      cursor: pointer;
+      flex-shrink: 0;
+      margin-top: 1px;
+      transition: var(--transition);
+      position: relative;
+    }
+    .check-row input[type="checkbox"]:checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .check-row input[type="checkbox"]:checked::after {
+      content: '';
+      position: absolute;
+      left: 4px; top: 1px;
+      width: 6px; height: 10px;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+    .check-row label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+      cursor: pointer;
+    }
+
+    /* ─── Advanced selector ─── */
+    .selector-section { margin-top: 4px; }
+    .selector-toggle {
+      font-size: 11px;
+      color: var(--accent-light);
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      transition: color var(--transition);
+    }
+    .selector-toggle:hover { color: #fff; }
+    .selector-input-wrap {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height .35s ease, margin .35s ease;
+      margin-top: 0;
+    }
+    .selector-input-wrap.open {
+      max-height: 100px;
+      margin-top: 10px;
+    }
+    .selector-input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      outline: none;
+      transition: var(--transition);
+    }
+    .selector-input::placeholder { color: #555; }
+    .selector-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    /* ─── Save button ─── */
+    .save-btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: .5px;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 2px 12px var(--accent-glow);
+      position: relative;
+      overflow: hidden;
+    }
+    .save-btn::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,.1), transparent);
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+    .save-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 20px var(--accent-glow); }
+    .save-btn:hover::after { opacity: 1; }
+    .save-btn:active { transform: translateY(0); }
+
+    /* ─── Status toast ─── */
+    .toast {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 500;
+      min-height: 18px;
+      transition: opacity var(--transition);
+      opacity: 0;
+    }
+    .toast.visible { opacity: 1; }
+    .toast.success { color: var(--accent-light); }
+    .toast.error   { color: var(--danger); }
+
+    /* ─── Footer ─── */
+    .footer {
+      text-align: center;
+      padding: 0 20px 14px;
+      font-size: 10px;
+      color: #444;
+    }
+
+    /* ═══════════ ANIMATIONS ═══════════ */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .main > * {
+      animation: fadeInUp .4s ease both;
+    }
+    .main > *:nth-child(1) { animation-delay: .05s; }
+    .main > *:nth-child(2) { animation-delay: .10s; }
+    .main > *:nth-child(3) { animation-delay: .15s; }
+    .main > *:nth-child(4) { animation-delay: .20s; }
+    .main > *:nth-child(5) { animation-delay: .25s; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-icon">
+      <svg viewBox="0 0 24 24"><path d="M10.09 15.59 11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5a2 2 0 0 0-2 2v4h2V5h14v14H5v-4H3v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"/></svg>
+    </div>
+    <div class="header-text">
+      <h1>Meet Auto-Leave</h1>
+      <p>Auto-exit when participants drop</p>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- Enable / disable toggle -->
+    <div class="toggle-row">
+      <span class="toggle-label">Monitoring</span>
+      <label class="toggle">
+        <input type="checkbox" id="enabled" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <!-- Threshold card -->
+    <div class="card">
+      <div class="card-title">Threshold</div>
+      <div class="threshold-row">
+        <label for="min">Leave when below</label>
+        <input type="number" class="threshold-input" id="min" min="1" value="2">
+        <span class="unit">people</span>
+      </div>
+      <div class="check-row">
+        <input type="checkbox" id="require" checked>
+        <label for="require">Only leave after the room first reached this number</label>
+      </div>
+    </div>
+
+    <!-- Advanced card -->
+    <div class="card">
+      <div class="card-title">Advanced</div>
+      <button class="selector-toggle" id="selectorToggle">Custom CSS selector for participant count</button>
+      <div class="selector-input-wrap" id="selectorWrap">
+        <input type="text" class="selector-input" id="selector" placeholder=".your-class, [data-attr], etc.">
+      </div>
+    </div>
+
+    <!-- Save -->
+    <button class="save-btn" id="save">Save Settings</button>
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <div class="footer">Works on Chrome · Edge · Firefox</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
